@@ -1,36 +1,11 @@
 from aocd.models import Puzzle
 import re
-from utils import *
+from src.utils import *
 
 puzzle = Puzzle(year=2022, day=7)
 
 inp = puzzle.input_data.splitlines()[2:]
 
-# inp = """$ cd /
-# $ ls
-# dir a
-# 14848514 b.txt
-# 8504156 c.dat
-# dir d
-# $ cd a
-# $ ls
-# dir e
-# 29116 f
-# 2557 g
-# 62596 h.lst
-# $ cd e
-# $ ls
-# 584 i
-# $ cd ..
-# $ cd ..
-# $ cd d
-# $ ls
-# 4060174 j
-# 8033020 d.log
-# 5626152 d.ext
-# 7214296 k"""
-
-# inp = inp.splitlines()[2:]
 
 class Dir:
     def __init__(self, name, parent):
@@ -84,32 +59,16 @@ def get_sizes(directory):
 
 get_sizes(parent)
 
-print(size)
-
 total = 0
-bad_sol = set()
 for v, dir_size in size.items():
     if dir_size <= 100000:
         total += dir_size
-        print(v, dir_size)
 
-        bad_sol.add(v)
+puzzle.answer_a = total
 
-print(total)
 
-from collections import defaultdict
-from itertools import accumulate
+missing_space = abs(40_000_000 - parent.get_size())
 
-val = list(map(str.split, puzzle.input_data.splitlines()))
-dirs = defaultdict(int)
-path = []
+potential_deletions = [s for s in size.values() if s > missing_space]
 
-for v in val:
-    if v[0] == "$":
-        if v[1] == "cd":
-            path.pop() if v[2] == ".." else path.append(v[2])
-    elif v[0] != "dir":
-        for p in accumulate(path, lambda x, y: x + "/" + y):
-            dirs[p] += int(v[0])
-
-# print([key for key, size in dirs.items() if size <= 100_000])
+puzzle.answer_b = min(potential_deletions)
