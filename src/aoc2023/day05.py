@@ -42,14 +42,12 @@ inp = puzzle.input_data.splitlines()
 
 # Part 1
 
-
-seeds = inp[0].replace("seeds: ", "").split(" ")
+seeds = [int(x) for x in inp[0].replace("seeds: ", "").split(" ")]
 
 new_seeds = []
-
 for i in range(0, len(seeds), 2):
-    start = int(seeds[i])
-    step = int(seeds[i + 1])
+    start = seeds[i]
+    step = seeds[i + 1]
     new_seeds.append(range(start, start + step))
 
 
@@ -57,77 +55,85 @@ for i in range(0, len(seeds), 2):
 
 data = {}
 
-elements = []
-
 element = ""
 for x, line in enumerate(inp[1:]):
     nums = [(int(x), int(y), int(z)) for x, y, z in re.findall(r"(\d+) (\d+) (\d+)", line)]
-    t = line.split("-")
-    if len(t) > 1:
-        element = t[0]
-        data[element] = []
-        elements.append(element)
-    if not nums:
-        continue
-    data[element].append(nums[0])
+    if nums:
+        data[element].append(nums[0])
+    else:
+        t = line.split("-")
+        if len(t) > 1:
+            element = t[0]
+            data[element] = []
 
 
-# positions = []
-# for start, step in new_seeds:
-#     pos = int(seed)
-#     seed = int(seed)
-#     for element in elements:
-#         mappings = d[element]
-#         for start, dest, step in mappings:
-#             if pos > start and pos < start + step:
-#                 diff = pos - start
-#                 pos = dest + diff
-#                 break
+positions = []
+for seed in seeds:
+    pos = seed
+    for element, mappings in data.items():
+        for dest, start, step in mappings:
+            if pos > start and pos < start + step:
+                diff = pos - start
+                pos = dest + diff
+                break
+    positions.append(pos)
 
-#     positions.append(pos)
-
-# print(min(res))
+puzzle.answer_a = min(positions)
 
 
-# print(positions)
-# print(min(positions))
-# puzzle.answer_a = min(positions)
+# Part two
 
 
 def find_range_overlap(range1, range2):
+    """
+    Will return the overlap between two ranges
+    """
     overlap_start = max(range1.start, range2.start)
     overlap_end = min(range1.stop, range2.stop)
 
     if overlap_start < overlap_end:
         return range(overlap_start, overlap_end)
-    else:
-        return None
+    return None
+
+
+def get_leftover_ranges(main_range, overlap_range):
+    """
+    >>> list(get_leftover_ranges(range(1, 10), range(4,5)))
+    >>> [range(1,4), range(5, 10)]
+    """
+    if overlap_range.start > main_range.start:
+        yield range(main_range.start, overlap_range.start)
+    if overlap_range.stop < main_range.stop:
+        yield range(overlap_range.stop, main_range.stop)
 
 
 range_stack = new_seeds
 
 seen = set()
-for element in elements:
-    tmp_range = set()
+# For each level iterate over all the ranges
+for element, element_ranges in data.items():
+    level_ranges = set()
     while range_stack:
-        test_range = range_stack.pop()
-        if test_range in seen:
+        seed_range = range_stack.pop()
+        if seed_range in seen:
+            # This is not needed, but it makes the code faster
             continue
-        for dest, start, step in reversed(data[element]):
-            new_range = range(start, start + step)
-            overlap = find_range_overlap(test_range, new_range)
-            if overlap:
-                tmp_range.add(
-                    range(dest - start + overlap.start, dest - start + overlap.start + len(overlap))
-                )
-                if len(overlap) != len(test_range):
-                    if overlap.start > test_range.start:
-                        range_stack.append(range(test_range.start, overlap.start))
-                    if overlap.stop < test_range.stop:
-                        range_stack.append(range(overlap.stop, test_range.stop))
-                seen.add(test_range)
-    range_stack = list(tmp_range)
+        for dest, start, step in reversed(element_ranges):
+            element_rng = range(start, start + step)
+            if overlap := find_range_overlap(seed_range, element_rng):
+                # Diff from the start and the start of the overlap
+                diff = overlap.start - start
+                level_ranges.add(range(dest + diff, dest + diff + len(overlap)))
+
+                # Got leftover ranges to add
+                # If there are parts of the range that do not match with the overlap
+                # we need to carry them over
+                range_stack.extend(get_leftover_ranges(seed_range, overlap))
+
+                seen.add(seed_range)
+    # Reset for next stage
+    range_stack = list(level_ranges)
     seen = set()
 
 
-puzzle.answer_b = min([start.start for start in range_stack])
+puzzle.answer_b = min((start.start for start in range_stack))
