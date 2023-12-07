@@ -2,7 +2,7 @@ from aocd.models import Puzzle
 from enum import IntEnum
 from src.utils import *
 from collections import Counter
-from functools import cmp_to_key
+from functools import cmp_to_key, partial
 
 puzzle = Puzzle(year=2023, day=7)
 
@@ -58,9 +58,12 @@ mapping = {
 }
 
 
-def compare_hands(hand1, hand2):
-    cards1, kind1, _ = hand1
-    cards2, kind2, _ = hand2
+def compare_hands(hand_to_rank, hand1, hand2):
+    cards1, _ = hand1
+    cards2, _ = hand2
+    kind1 = hand_to_rank(cards1)
+    kind2 = hand_to_rank(cards2)
+
     if kind1 < kind2:
         return -1
     if kind1 > kind2:
@@ -73,38 +76,26 @@ def compare_hands(hand1, hand2):
     return 0
 
 
+def hand_to_rank_joker(hand):
+    possible_hands = [hand.replace("1", card) for card in "23456789TJQKA"]
+    return max(hand_to_rank(possible_hand) for possible_hand in possible_hands)
+
+
 def get_score(hands):
-    res = 0
-    for pos, (_, _, bid) in enumerate(hands, start=1):
-        res += bid * pos
-    return res
+    return sum(bid * pos for pos, (_, bid) in enumerate(hands, start=1))
 
 
-hands = []
-for line in inp:
-    hand, bid = line.split(" ")
-    bid = int(bid)
-    hands.append((hand, hand_to_rank(hand), bid))
-
-hands = sorted(hands, key=cmp_to_key(compare_hands))
 
 # Part 1
+hands = [(part[0], int(part[1])) for part in (line.split() for line in inp)]
+
+hands = sorted(hands, key=cmp_to_key(partial(compare_hands, hand_to_rank)))
 
 puzzle.answer_a = get_score(hands)
 
-
-def hand_to_rank_joker(hand):
-    best = 1
-    for card in "23456789TQKA":
-        # We will always want to replace with the same value of cards
-        alternate = hand.replace("J", card)
-        kind = hand_to_rank(alternate)
-        best = max(kind, best)
-    return best
-
-
-joker_hands = [(hand.replace("J", "1"), hand_to_rank_joker(hand), bid) for (hand, _, bid) in hands]
-joker_hands = sorted(joker_hands, key=cmp_to_key(compare_hands))
-
 # Part 2
+
+joker_hands = [(hand.replace("J", "1"), bid) for (hand, bid) in hands]
+joker_hands = sorted(joker_hands, key=cmp_to_key(partial(compare_hands, hand_to_rank_joker)))
+
 puzzle.answer_b = get_score(joker_hands)
