@@ -15,7 +15,7 @@ def read_input(inp):
     for line in inp[2:]:
         parts = line.split("=")
         key = parts[0].strip()
-        d[key] = tuple(part.strip("()").strip() for part in parts[1][1:].split(","))
+        d[key] = tuple(part.replace(" ", "").strip("()") for part in parts[1].split(","))
     return pattern, d
 
 
