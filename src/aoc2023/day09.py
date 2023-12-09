@@ -1,8 +1,8 @@
-from email.policy import default
 from aocd.models import Puzzle
 from src.utils import *
-from collections import defaultdict
 import numpy as np
+from itertools import count
+
 puzzle = Puzzle(year=2023, day=9)
 
 inp = puzzle.example_data.splitlines()
@@ -10,42 +10,18 @@ inp = puzzle.example_data.splitlines()
 inp = puzzle.input_data.splitlines()
 
 
-total = 0
-for history in inp:
-    nums = defaultdict(list)
-    nums[0] = [int(x) for x in history.split(" ")]
-
-    step = 0
-    while True:
-        nums[step + 1] = [nums[step][i] - nums[step][i - 1] for i in range(1, len(nums[step]))]
-
-        step += 1
-        if all(x == 0 for x in nums[step]):
-            last = nums[step][-1]
-            for i in range(step, 0, -1):
-                last = last + nums[i - 1][-1]
-            total += last
-            break
+def to_array(history, flip=False):
+    arr = np.array([int(x) for x in history.split(" ")])
+    return np.flip(arr) if flip else arr
 
 
-puzzle.answer_a = total
+def extrapolate(arr):
+    for step in count(start=1):
+        if np.all(np.diff(arr, step) == 0):
+            return int(np.sum([np.diff(arr, i)[-1] for i in range(step)]))
+    raise Exception("Should not end up here")
 
-# Part 2
 
-total = 0
-for history in inp:
-    nums = defaultdict(list)
-    nums[0] = [int(x) for x in history.split(" ")]
+puzzle.answer_a = sum([extrapolate(to_array(history)) for history in inp])
 
-    step = 0
-    while True:
-        nums[step + 1] = [nums[step][i] - nums[step][i - 1] for i in range(1, len(nums[step]))]
-        step += 1
-        if all(x == 0 for x in nums[step]):
-            last = nums[step][0]
-            for i in range(step, 0, -1):
-                last = -last + nums[i - 1][0]
-            total += last
-            break
-
-puzzle.answer_b = total
+puzzle.answer_b = sum([extrapolate(to_array(history, flip=True)) for history in inp])
