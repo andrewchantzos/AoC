@@ -1,6 +1,7 @@
 class Grid:
     def __init__(self, inp):
-        self.grid = inp
+        self.grid = [list(line) for line in inp]
+
         self.length, self.height = self._inp_size()
 
     def _inp_size(self):
@@ -8,12 +9,12 @@ class Grid:
         height = len(self.grid)
         return length, height
 
-    def get_neighbors(self, line_num, pos, include_diagonal=True):
+    def get_neighbors(self, row, col, include_diagonal=True):
         neighbors = []
 
-        for i in range(max(0, line_num - 1), min(self.length, line_num + 2)):
-            for j in range(max(0, pos - 1), min(self.height, pos + 2)):
-                if (i, j) != (line_num, pos) and (include_diagonal or i == line_num or j == pos):
+        for i in range(max(0, row - 1), min(self.height, row + 2)):
+            for j in range(max(0, col - 1), min(self.length, col + 2)):
+                if (i, j) != (row, col) and (include_diagonal or i == row or j == col):
                     neighbors.append((i, j))
 
         return neighbors
@@ -27,10 +28,17 @@ class Grid:
     def get(self, row, col):
         return self.grid[row][col]
 
+    def set(self, row, col, val):
+        self.grid[row][col].replace(self.grid[row][col], val)
+    
     def __getitem__(self, pos):
         row, col = pos
         return self.grid[row][col]
 
+    def __setitem__(self, pos, val):
+        row, col = pos
+        self.grid[row][col] = val
+    
     def get_column(self, pos):
         return [line[pos] for line in self.grid]
 
