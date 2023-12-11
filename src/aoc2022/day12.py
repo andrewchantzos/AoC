@@ -31,7 +31,6 @@ for coord in product(range(grid.height), range(grid.length)):
         if ord(grid[coord]) + 1 >= ord(grid[neighbour]):
             G.add_edge(coord, neighbour)
 
-# path = nx.shortest_path(G, start, end, method="bellman-ford")
 
 puzzle.answer_a = nx.shortest_path_length(G, start, end)
 

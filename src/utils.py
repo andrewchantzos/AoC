@@ -1,3 +1,6 @@
+import itertools
+
+
 class Grid:
     def __init__(self, inp):
         self.grid = [list(line) for line in inp]
@@ -30,7 +33,7 @@ class Grid:
 
     def set(self, row, col, val):
         self.grid[row][col].replace(self.grid[row][col], val)
-    
+
     def __getitem__(self, pos):
         row, col = pos
         return self.grid[row][col]
@@ -38,9 +41,28 @@ class Grid:
     def __setitem__(self, pos, val):
         row, col = pos
         self.grid[row][col] = val
-    
+
     def get_column(self, pos):
         return [line[pos] for line in self.grid]
+
+    def size(self):
+        return self.length * self.height
+
+    def inner_coordinates(self):
+        return list(itertools.product(range(1, self.length - 1), range(1, self.height - 1)))
+
+    def cross_coordinates(self, coord):
+        row, col = coord
+        left = [(row, i) for i in range(0, col)]
+        right = [(row, i) for i in range(col + 1, self.length)]
+        up = [(i, col) for i in range(0, row)]
+        down = [(i, col) for i in range(row + 1, self.height)]
+
+        return reversed(left), right, reversed(up), down
+
+    def get_values(self, coords):
+        return {coord: self[coord] for coord in coords}
+
 
 def read_file(day):
     with open(f"input/day{day}.txt") as f:
