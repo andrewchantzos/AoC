@@ -45,6 +45,13 @@ class Grid:
     def get_column(self, pos):
         return [line[pos] for line in self.grid]
 
+    def get_row(self, pos):
+        return self.grid[pos]
+
+    def items(self):
+        for coord in itertools.product(range(self.height), range(self.length)):
+            yield coord, self[coord]
+
     def size(self):
         return self.length * self.height
 
