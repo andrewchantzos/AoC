@@ -42,11 +42,26 @@ class Grid:
         row, col = pos
         self.grid[row][col] = val
 
+    def get_row(self, pos):
+        return self.grid[pos]
+
+    def columns(self):
+        for i in range(self.length):
+            yield [line[i] for line in self.grid]
+
+    def set_column(self, column, pos):
+        for i in range(self.length):
+            self[(i, pos)] = column[i]
+
     def get_column(self, pos):
         return [line[pos] for line in self.grid]
 
-    def get_row(self, pos):
-        return self.grid[pos]
+    def rows(self):
+        for line in self.grid:
+            yield line
+
+    def set_row(self, row, pos):
+        self.grid[pos] = row
 
     def items(self):
         for coord in itertools.product(range(self.height), range(self.length)):
@@ -57,6 +72,9 @@ class Grid:
 
     def inner_coordinates(self):
         return list(itertools.product(range(1, self.length - 1), range(1, self.height - 1)))
+
+    def flip(self, coord1, coord2):
+        self[coord1], self[coord2] = self[coord2], self[coord1]
 
     def cross_coordinates(self, coord):
         row, col = coord
@@ -69,6 +87,18 @@ class Grid:
 
     def get_values(self, coords):
         return {coord: self[coord] for coord in coords}
+
+    def get_coords_for_value(self, value):
+        l = []
+        for coord, c in self.items():
+            if c == value:
+                l.append(coord)
+        return l
+
+    def print(self):
+        for line in self.grid:
+            print(line)
+        print()
 
 
 def read_file(day):
