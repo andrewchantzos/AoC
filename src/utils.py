@@ -1,18 +1,43 @@
+from typing import Tuple, List, Callable, Any, Iterable, TypeVar
 import itertools
+
+Coordinates = Tuple[int, int]
+T = TypeVar("T", int, str, float, complex)
 
 
 class Grid:
-    def __init__(self, inp):
-        self.grid = [list(line) for line in inp]
+    """
+    A class representing a 2D grid.
+    """
 
-        self.length, self.height = self._inp_size()
+    def __init__(self, inp: list[str], mapper: Callable[[str], List[T]] = list):
+        """
+        A class representing a 2D grid.
 
-    def _inp_size(self):
-        length = len(self.grid[0])
-        height = len(self.grid)
-        return length, height
+        Parameters:
+        - inp (List[str]): A list of strings representing the grid.
+        - mapper (Callable[[str], List[T]]): A function to map each line in inp. Default is list().
 
-    def get_neighbors(self, row, col, include_diagonal=True):
+        Attributes:
+        - grid (list): A 2D list representing the grid.
+        - length (int): The length (number of columns) of the grid.
+        - height (int): The height (number of rows) of the grid.
+        """
+        self.grid = [mapper(line) for line in inp]
+        self.length, self.height = len(self.grid[0]), len(self.grid)
+
+    def get_neighbors(self, row: int, col: int, include_diagonal=True) -> List[Coordinates]:
+        """
+        Get the neighboring coordinates of a given position.
+
+        Parameters:
+        - `row` (int): The row index of the position.
+        - `col` (int): The column index of the position.
+        - `include_diagonal` (bool): Whether to include diagonal neighbors.
+
+        Returns:
+        `list[Coordinates]`: A list of neighboring coordinates.
+        """
         neighbors = []
 
         for i in range(max(0, row - 1), min(self.height, row + 2)):
@@ -22,11 +47,28 @@ class Grid:
 
         return neighbors
 
-    def get_range_neighbours(self, line_num, start, end, include_diagonal=True):
-        neighbours = set()
-        for pos in range(start, end):
-            neighbours.update(self.get_neighbors(line_num, pos, include_diagonal))
-        return list(neighbours)
+    def get_range_neighbors(
+        self, line_num: int, start: int, end: int, include_diagonal=True
+    ) -> list[Coordinates]:
+        """
+        Get the neighboring coordinates within a range of positions in a specific line.
+
+        Parameters:
+        - `line_num` (int): The index of the line.
+        - `start` (int): The starting position in the line.
+        - `end` (int): The ending position in the line.
+        - `include_diagonal` (bool): Whether to include diagonal neighbors.
+
+        Returns:
+        `list[Coordinates]`: A list of neighboring coordinates.
+        """
+        return list(
+            set(
+                itertools.chain.from_iterable(
+                    self.get_neighbors(line_num, pos, include_diagonal) for pos in range(start, end)
+                )
+            )
+        )
 
     def get(self, row, col):
         return self.grid[row][col]
@@ -63,20 +105,52 @@ class Grid:
     def set_row(self, row, pos):
         self.grid[pos] = row
 
-    def items(self):
+    def items(self) -> Iterable[Tuple[Coordinates, T]]:
+        """
+        Get an iterable of tuples representing the coordinates and values of each element in the grid.
+
+        Returns:
+        Iterable[Tuple[Coordinates, T]]: An iterable of tuples where each tuple contains a coordinate
+        and the corresponding value in the grid.
+        """
         for coord in itertools.product(range(self.height), range(self.length)):
             yield coord, self[coord]
 
-    def size(self):
+    def size(self) -> int:
+        """
+        Get the size of the grid
+
+        Returns:
+        int: Size of grid
+        """
         return self.length * self.height
 
-    def inner_coordinates(self):
+    def inner_coordinates(self) -> list[Coordinates]:
+        """
+        Get the coordinates of inner points in the grid, excluding the boundary.
+
+        Returns:
+        List[Coordinates]: A list of coordinate tuples representing inner points in the grid.
+        """
         return list(itertools.product(range(1, self.length - 1), range(1, self.height - 1)))
 
     def flip(self, coord1, coord2):
         self[coord1], self[coord2] = self[coord2], self[coord1]
 
-    def cross_coordinates(self, coord):
+    def cross_coordinates(
+        self, coord: Coordinates
+    ) -> Tuple[
+        Iterable[Coordinates], Iterable[Coordinates], Iterable[Coordinates], Iterable[Coordinates]
+    ]:
+        """
+        Get the coordinates forming a cross pattern around a specified coordinate.
+        Parameters:
+        - coord (Coordinates): The coordinate (row, column) around which the cross pattern is formed.
+
+        Returns:
+        A tuple containing four iterables representing the coordinates of the left, right, up, and down arms
+        of the cross pattern, respectively.
+        """
         row, col = coord
         left = [(row, i) for i in range(0, col)]
         right = [(row, i) for i in range(col + 1, self.length)]
@@ -85,17 +159,13 @@ class Grid:
 
         return reversed(left), right, reversed(up), down
 
-    def get_values(self, coords):
+    def get_values(self, coords: Iterable[Coordinates]) -> dict[Coordinates, T]:
         return {coord: self[coord] for coord in coords}
 
-    def get_coords_for_value(self, value):
-        l = []
-        for coord, c in self.items():
-            if c == value:
-                l.append(coord)
-        return l
+    def get_coords_for_value(self, value: T) -> list[Coordinates]:
+        return [coord for coord, c in self.items() if c == value]
 
-    def print(self):
+    def display(self):
         for line in self.grid:
             print(line)
         print()
