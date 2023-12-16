@@ -1,8 +1,16 @@
 from typing import Tuple, List, Callable, Any, Iterable, TypeVar
 import itertools
+from enum import Enum
 
 Coordinates = Tuple[int, int]
 T = TypeVar("T", int, str, float, complex)
+
+
+class Direction(Enum):
+    U = "UP"
+    D = "DOWN"
+    R = "RIGHT"
+    L = "LEFT"
 
 
 class Grid:
@@ -25,6 +33,18 @@ class Grid:
         """
         self.grid = [mapper(line) for line in inp]
         self.length, self.height = len(self.grid[0]), len(self.grid)
+
+    def move_dir(self, coord, dir):
+        row, col = coord
+        if dir == Direction.U and row - 1 >= 0:
+            return (row - 1, col)
+        elif dir == Direction.D and row + 1 < self.height:
+            return (row + 1, col)
+        elif dir == Direction.L and col - 1 >= 0:
+            return (row, col - 1)
+        elif dir == Direction.R and col + 1 < self.length:
+            return (row, col + 1)
+        return None
 
     def get_neighbors(self, row: int, col: int, include_diagonal=True) -> List[Coordinates]:
         """
