@@ -10,39 +10,36 @@ grid = Grid(inp)
 
 
 def get_next(g, coord, dir):
-    match (g[coord], dir):
-        case (".", _):
-            return [(g.move_dir(coord, dir), dir)]
-        case ("|", Direction.L) | ("|", Direction.R):
-            return [
-                (g.move_dir(coord, Direction.U), Direction.U),
-                (g.move_dir(coord, Direction.D), Direction.D),
-            ]
-        case ("-", Direction.U) | ("-", Direction.D):
-            return [
-                (g.move_dir(coord, Direction.L), Direction.L),
-                (g.move_dir(coord, Direction.R), Direction.R),
-            ]
-        case ("-" | "|", _):
-            return [(g.move_dir(coord, dir), dir)]
-        case ("\\", Direction.U):
-            return [(g.move_dir(coord, Direction.L), Direction.L)]
-        case ("\\", Direction.D):
-            return [(g.move_dir(coord, Direction.R), Direction.R)]
-        case ("\\", Direction.R):
-            return [(g.move_dir(coord, Direction.D), Direction.D)]
-        case ("\\", Direction.L):
-            return [(g.move_dir(coord, Direction.U), Direction.U)]
-        case ("/", Direction.U):
-            return [(g.move_dir(coord, Direction.R), Direction.R)]
-        case ("/", Direction.D):
-            return [(g.move_dir(coord, Direction.L), Direction.L)]
-        case ("/", Direction.R):
-            return [(g.move_dir(coord, Direction.U), Direction.U)]
-        case ("/", Direction.L):
-            return [(g.move_dir(coord, Direction.D), Direction.D)]
-        case (_, _):
-            return []
+    def directions():
+        match (g[coord], dir):
+            case (".", _):
+                return [dir]
+            case ("|", Direction.L) | ("|", Direction.R):
+                return [Direction.U, Direction.D]
+            case ("-", Direction.U) | ("-", Direction.D):
+                return [Direction.L, Direction.R]
+            case ("-" | "|", _):
+                return [dir]
+            case ("\\", Direction.U):
+                return [Direction.L]
+            case ("\\", Direction.D):
+                return [Direction.R]
+            case ("\\", Direction.R):
+                return [Direction.D]
+            case ("\\", Direction.L):
+                return [Direction.U]
+            case ("/", Direction.U):
+                return [Direction.R]
+            case ("/", Direction.D):
+                return [Direction.L]
+            case ("/", Direction.R):
+                return [Direction.U]
+            case ("/", Direction.L):
+                return [Direction.D]
+            case (_, _):
+                return []
+
+    return [(g.move_dir(coord, dir), dir) for dir in directions()]
 
 
 def dfs(start, direction, visited=None):
