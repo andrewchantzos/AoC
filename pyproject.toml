@@ -13,6 +13,8 @@ pylint = "^2.15.8"
 black = "^22.10.0"
 parse = "^1.20.0"
 numpy = "^1.21.0"
+networkx = "^3.2.1"
+nographs = "^3.3.0"
 advent-of-code-data = "^1.0.0"
 
 [tool.black]

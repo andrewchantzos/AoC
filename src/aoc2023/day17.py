@@ -2,6 +2,7 @@ from aocd.models import Puzzle
 from src.utils import *
 from collections import namedtuple
 import heapq
+import nographs as nog
 
 puzzle = Puzzle(year=2023, day=17)
 
@@ -52,6 +53,19 @@ def dijkstra(grid, start, end, min_moves=1, max_moves=3):
     return -1
 
 
+def get_min_nog(grid, start, end, min_moves=1, max_moves=3):
+    def next_edges(state, _):
+        for x in neighbours(grid, state, min_moves, max_moves):
+            yield x, x.weight
+
+    t = nog.TraversalShortestPaths(next_edges)
+    start_vertices = [
+        State(coord=start, direction=dir, moves=0, weight=grid[start]) for dir in Direction
+    ]
+    for node in t.start_from(start_vertices=start_vertices):
+        if node.coord == end and node.moves > min_moves:
+            return t.distance
+          
 grid = Grid(puzzle.input_data.splitlines(), mapper=lambda x: list(int(s) for s in x))
 
 
