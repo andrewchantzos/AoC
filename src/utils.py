@@ -1,16 +1,42 @@
 from typing import Tuple, List, Callable, Any, Iterable, TypeVar
 import itertools
-from enum import Enum
+from enum import IntEnum
 
 Coordinates = Tuple[int, int]
 T = TypeVar("T", int, str, float, complex)
 
 
-class Direction(Enum):
-    U = "UP"
-    D = "DOWN"
-    R = "RIGHT"
-    L = "LEFT"
+class Direction(IntEnum):
+    U = 1
+    D = 2
+    R = 3
+    L = 4
+
+    def move(self, coord):
+        row, col = coord
+        if self == Direction.U:
+            return (row -1, col)
+        elif self == Direction.D:
+            return (row + 1, col)
+        elif self == Direction.R:
+            return (row, col + 1)
+        elif self == Direction.L:
+            return (row, col - 1)
+        else:
+            raise ValueError("Invalid direction")
+
+
+    def opposite(self):
+        if self == Direction.U:
+            return Direction.D
+        elif self == Direction.D:
+            return Direction.U
+        elif self == Direction.R:
+            return Direction.L
+        elif self == Direction.L:
+            return Direction.R
+        else:
+            raise ValueError("Invalid direction")
 
 
 class Grid:
@@ -45,6 +71,10 @@ class Grid:
         elif dir == Direction.R and col + 1 < self.length:
             return (row, col + 1)
         return None
+
+    def is_in(self, coord):
+        row, col = coord
+        return row >= 0 and col >= 0 and row < self.height and col < self.length
 
     def get_neighbors(self, row: int, col: int, include_diagonal=True) -> List[Coordinates]:
         """
@@ -189,6 +219,10 @@ class Grid:
         for line in self.grid:
             print(line)
         print()
+
+    @property
+    def end(self):
+        return (self.height - 1, self.length - 1)
 
 
 def read_file(day):
