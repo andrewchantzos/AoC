@@ -15,6 +15,7 @@ parse = "^1.20.0"
 numpy = "^1.21.0"
 networkx = "^3.2.1"
 nographs = "^3.3.0"
+shapely = "^2.0.2"
 advent-of-code-data = "^1.0.0"
 
 [tool.black]
