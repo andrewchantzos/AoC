@@ -1,16 +1,17 @@
 from typing import Tuple, List, Callable, Any, Iterable, TypeVar
 import itertools
 from enum import IntEnum
+import nographs as nog
 
 Coordinates = Tuple[int, int]
 T = TypeVar("T", int, str, float, complex)
 
 
 class Direction(IntEnum):
-    U = 1
-    D = 2
-    R = 3
-    L = 4
+    R = 0
+    D = 1
+    L = 2
+    U = 3
 
     def move(self, coord):
         row, col = coord
@@ -25,7 +26,18 @@ class Direction(IntEnum):
         else:
             raise ValueError("Invalid direction")
 
-
+    def diff(self):
+        if self == Direction.U:
+            return (1, 0)
+        elif self == Direction.D:
+            return (-1, 0)
+        elif self == Direction.R:
+            return (0, 1)
+        elif self == Direction.L:
+            return (0, -1)
+        else:
+            raise ValueError("Invalid direction")
+        
     def opposite(self):
         if self == Direction.U:
             return Direction.D
