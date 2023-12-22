@@ -57,4 +57,4 @@ grids = [Grid(x.splitlines()) for x in grid_lines]
 puzzle.answer_a = sum(get_value(*reflections(grid)) for grid in grids)
 
 
-puzzle.answer_b = sum(get_value(*smudge(grid)) for grid in grids)
+print(sum(get_value(*smudge(grid)) for grid in grids))

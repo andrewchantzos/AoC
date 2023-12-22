@@ -1,7 +1,6 @@
 from aocd.models import Puzzle
 from src.utils import *
 from shapely.geometry import Polygon
-
 puzzle = Puzzle(year=2023, day=18)
 
 inp = puzzle.input_data.splitlines()

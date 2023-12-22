@@ -16,7 +16,7 @@ class Direction(IntEnum):
     def move(self, coord):
         row, col = coord
         if self == Direction.U:
-            return (row -1, col)
+            return (row - 1, col)
         elif self == Direction.D:
             return (row + 1, col)
         elif self == Direction.R:
@@ -37,7 +37,7 @@ class Direction(IntEnum):
             return (0, -1)
         else:
             raise ValueError("Invalid direction")
-        
+
     def opposite(self):
         if self == Direction.U:
             return Direction.D
@@ -88,7 +88,7 @@ class Grid:
         row, col = coord
         return row >= 0 and col >= 0 and row < self.height and col < self.length
 
-    def get_neighbors(self, row: int, col: int, include_diagonal=True) -> List[Coordinates]:
+    def get_neighbors(self, coord: Coordinates, include_diagonal=True) -> List[Coordinates]:
         """
         Get the neighboring coordinates of a given position.
 
@@ -101,7 +101,7 @@ class Grid:
         `list[Coordinates]`: A list of neighboring coordinates.
         """
         neighbors = []
-
+        row, col = coord
         for i in range(max(0, row - 1), min(self.height, row + 2)):
             for j in range(max(0, col - 1), min(self.length, col + 2)):
                 if (i, j) != (row, col) and (include_diagonal or i == row or j == col):
@@ -127,7 +127,7 @@ class Grid:
         return list(
             set(
                 itertools.chain.from_iterable(
-                    self.get_neighbors(line_num, pos, include_diagonal) for pos in range(start, end)
+                    self.get_neighbors((line_num, pos), include_diagonal) for pos in range(start, end)
                 )
             )
         )
@@ -138,9 +138,18 @@ class Grid:
     def set(self, row, col, val):
         self.grid[row][col].replace(self.grid[row][col], val)
 
-    def __getitem__(self, pos):
-        row, col = pos
+    def __getitem__(self, coord):
+        row, col = coord
         return self.grid[row][col]
+
+    # Use this when you need to wrap
+    def get(self, coord, wrap=True):
+        row, col = coord
+        if wrap:
+            row = row % self.length
+            col = col % self.height
+        return self.grid[row][col]
+
 
     def __setitem__(self, pos, val):
         row, col = pos

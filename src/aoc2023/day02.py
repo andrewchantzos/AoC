@@ -5,7 +5,7 @@ from collections import defaultdict
 puzzle = Puzzle(year=2023, day=2)
 
 inp = puzzle.input_data.splitlines()
-print(inp)
+
 # Get input
 def get_combo(txt):
     def _filter_regex(colour, txt):
